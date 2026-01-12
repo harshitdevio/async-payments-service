@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+import uvicorn
 from app.config.settings import Settings
 from app.api.http.error_handlers import register_error_handlers
 from app.api.routes.payments import router as payments_router
@@ -25,5 +25,6 @@ def create_app() -> FastAPI:
 
     return app
 
-
 app = create_app()
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

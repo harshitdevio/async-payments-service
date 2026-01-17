@@ -1,6 +1,6 @@
-from domain.payments.enums import PaymentStatus
-from domain.payments.state_machine import assert_transition_allowed
-from repositories.payments.payment_repo import PaymentRepository
+from app.domain.payments.enums import PaymentStatus
+from app.domain.payments.state_machine import assert_transition_allowed
+from app.repositories.payments.payment_repo import PaymentRepository
 
 
 class RefundService:

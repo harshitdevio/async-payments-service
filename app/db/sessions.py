@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
 )
-from config.settings import Settings
+from app.config.settings import Settings
 
 settings = Settings()
 

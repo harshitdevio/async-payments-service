@@ -10,8 +10,8 @@ from app.api.http.dependency import (
     get_refund_service,
 )
 from app.core.idempotency import IdempotencyKey
-from services.payments.payment_service import PaymentService
-from services.payments.refund_service import RefundService
+from app.services.payments.payment_service import PaymentService
+from app.services.payments.refund_service import RefundService
 
 router = APIRouter()
 

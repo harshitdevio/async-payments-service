@@ -27,12 +27,6 @@ The goal is **correctness and consistency**, not happy-path demos or synchronous
 - Provider Abstraction (Stripe-specific details are isolated in the infrastructure layer. The domain layer has zero knowledge of Stripe.)
 - Layered Architecture
 
-## Tradeoffs Made 
-
-## Limitations
-- Not an end-to-end product
-- A frontend checkout flow
-
 ---
 
 
@@ -123,4 +117,5 @@ a production-ready environment.
 
 Infrastructure choices are intentionally minimal.
 Correctness does not depend on queues or distributed systems.
+
 

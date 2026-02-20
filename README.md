@@ -1,17 +1,11 @@
-# Payment Orchestration Service 💳
+# Async Payments Service 💳
 
-A backend payment orchestration service designed to handle **asynchronous payments,
-webhook-driven state transitions, retries, and partial failures** — the way real
-production payment systems actually behave.
+An Async Payment Service built to model the failure modes that most payment tutorials quietly skip - out-of-order webhooks, duplicate delivery, crash-between-transactions.
+This covers real failure modes of async payments like webhook deduplication, race-safe idempotency, and strict state machine transitions.
 
-This service assumes failure as the default, not the edge case.
+This service assumes failure as the default, not the edge case!
 
 ---
-
-## What is this? 🚨 (Read this first)
-
-This is a backend system component responsible for **correct and reliable payment
-state management** in the presence of unreliable external systems.
 
 It intentionally assumes that:
 - webhook callbacks are duplicated
@@ -21,56 +15,26 @@ It intentionally assumes that:
 
 The goal is **correctness and consistency**, not happy-path demos or synchronous illusions.
 
-If this paragraph makes sense to you, the rest of the README will too.
+
+## Features
+- Explicit State Machine
+- Idempotent by default
+- Atomic Database Transactions
+- Race conditions handled
+- Webhook-driven Architecture
+- Stripe Signature Verification
+- Idempotent Webhook Processing
+- Provider Abstraction (Stripe-specific details are isolated in the infrastructure layer. The domain layer has zero knowledge of Stripe.)
+- Layered Architecture
+
+## Tradeoffs Made 
+
+## Limitations
+- Not an end-to-end product
+- A frontend checkout flow
 
 ---
 
-## Why payment systems are hard in production 🧠
-
-Payments are **not synchronous**.
-
-A `200 OK` response only means *“request accepted”* — not *“money moved”*.
-
-Final payment state arrives later via webhooks that are:
-- retried
-- duplicated
-- delivered at-least-once
-- potentially delayed or reordered
-
-Most demo systems quietly assume these problems away.
-This service is designed assuming **these problems are guaranteed to happen**.
-
----
-
-## What this service is NOT ❌ (Explicit non-goals)
-
-This service is intentionally scoped.
-
-It is **not**:
-- ❌ A frontend checkout flow
-- ❌ A Stripe SDK wrapper
-- ❌ A synchronous “payment succeeded” API
-- ❌ A tutorial-style happy-path demo
-- ❌ A standalone end-user product
-
-This is a **backend reliability and orchestration component**.
-
-Clear boundaries are a feature, not a limitation.
-
----
-
-## Core design principles 🧩
-
-These principles drive all design decisions in this service:
-
-- Webhooks are the **source of truth**
-- Payment state is managed via an **explicit state machine**
-- Idempotency is enforced by default
-- Duplicate and out-of-order events are expected
-- Controllers are thin; domain logic owns correctness
-- Provider-specific details do not leak into core domain logic
-
----
 
 ## High-level architecture 🏗️
 

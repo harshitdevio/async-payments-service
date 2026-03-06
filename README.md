@@ -1,126 +1,143 @@
-# Async Payments Service 💳
+# PaymentFlow
 
-An Async Payment Service built to model the failure modes that most payment tutorials quietly skip - out-of-order webhooks, duplicate delivery, crash-between-transactions.
-This covers real failure modes of async payments like webhook deduplication, race-safe idempotency, and strict state machine transitions.
+PaymentFlow is a payment processing backend built with **Stripe** API.
 
-This service assumes failure as the default, not the edge case!
+The project explores payment lifecycle management, state transitions, Stripe integration, and webhook processing using a layered backend architecture.
 
----
+## Core Features
 
-It intentionally assumes that:
-- webhook callbacks are duplicated
-- events arrive out of order
-- networks fail mid-operation
-- external providers are eventually consistent
+### 1. Payment State Management
 
-The goal is **correctness and consistency**, not happy-path demos or synchronous illusions.
-
-
-## Features
-- Explicit State Machine
-- Idempotent by default
-- Atomic Database Transactions
-- Race conditions handled
-- Webhook-driven Architecture
-- Stripe Signature Verification
-- Idempotent Webhook Processing
-- Provider Abstraction (Stripe-specific details are isolated in the infrastructure layer. The domain layer has zero knowledge of Stripe.)
-- Layered Architecture
-
-## Tradeoffs Made 
-
-## Limitations
-- Not an end-to-end product
-- A frontend checkout flow
-
----
-
-
-## High-level architecture 🏗️
+Payments move through a predefined set of states instead of being updated arbitrarily.
 
 ```text
-Client App
+PENDING
    │
-   │  (create payment)
    ▼
-Payment API
+REQUIRES_ACTION
    │
-   │  (initiate intent)
    ▼
-Payment Provider (Stripe-like)
+PROCESSING
    │
-   │  (async webhooks)
    ▼
-Webhook Handler
-   │
-   │  (validated state transitions)
-   ▼
-Payment State Store (DB)
+SUCCEEDED
+   ├── REFUNDED
+   └── FAILED
 ```
 
-## Payment state model
+Every status change is validated before being applied, helping prevent invalid payment states.
 
-Payments move through a strict state machine.
+### 2. Stripe Payment Intents
 
-Example states:
-- CREATED
-- PROCESSING
-- SUCCEEDED
-- FAILED
-- CANCELED
+Payments are created through Stripe Payment Intents.
 
-Rules:
-- Invalid or out-of-order transitions are rejected
-- Duplicate webhook events are safely ignored
-- Final states are immutable
+The application stores its own payment records while tracking the corresponding Stripe Payment Intent for synchronization and reconciliation.
 
-## Webhook handling & idempotency
+### 3. Webhook Processing
 
-Webhook events:
-- may be delivered multiple times
-- may arrive before previous events
-- may arrive after database retries
+Stripe webhooks are used to receive asynchronous payment updates.
 
-This service:
-- verifies webhook signatures
-- stores processed event IDs
-- guarantees idempotent processing
-- enforces valid state transitions only
+Incoming events are:
 
-## Failure scenarios handled
+- Signature verified
+- Stored in the database
+- Processed by the webhook service
+- Used to update local payment status
 
-- Duplicate webhook delivery
-- Out-of-order events
-- Network timeouts during state updates
-- Webhooks arriving before initial payment commit
-- Client retries creating payments
-- Provider retries callbacks
+This allows the application to stay synchronized with Stripe even when payment updates happen outside the initial request flow.
 
-## Live API (Hosted) 🌐
+### 4. Service and Repository Layers
 
-A hosted instance is available for **API contract inspection and behavioral reference**.
+Business logic is kept inside services while database operations are handled by repositories.
 
-- **Swagger UI:** (https://async-payments-service.onrender.com/docs) 
-- **Base URL:** (https://async-payments-service.onrender.com)
+```text
+Route
+  ↓
+Service
+  ↓
+Repository
+  ↓
+Database
+```
 
-This deployment exists to expose:
-- endpoint contracts
-- request / response shapes
-- validation rules
-- state transition behavior
+This keeps route handlers small and separates application logic from persistence logic.
 
-It is **not intended** to represent a complete end-to-end payment flow or
-a production-ready environment.
+### 5. Dependency Injection
 
+Services and repositories are created through FastAPI dependencies.
 
-## Tech stack
+```text
+Request
+  ↓
+Dependency
+  ↓
+Service
+  ↓
+Repository
+```
 
-- Python
-- FastAPI
-- PostgreSQL
-- Stripe (as payment provider)
-- Redis (optional, for idempotency helpers)
+This makes components easier to replace and test independently.
 
-Infrastructure choices are intentionally minimal.
-Correctness does not depend on queues or distributed systems.
+---
 
+## Project Structure
+
+```text
+api/
+├── routes/
+│   ├── payments.py
+│   ├── refunds.py
+│   └── stripe_webhooks.py
+│
+services/
+├── payment_service.py
+├── refund_service.py
+└── webhook_service.py
+│
+repositories/
+├── payment_repository.py
+└── stripe_event_repository.py
+│
+models/
+├── payment.py
+└── stripe_event.py
+```
+
+---
+
+## What This Project Focuses On
+
+- Payment creation.
+- Stripe Payment Intent integration
+- Webhook handling
+- Payment state transitions
+- Service and repository patterns
+- Async database access with SQLAlchemy
+
+---
+
+## What This Project Does Not Cover
+
+Some concerns that would exist in a production payment system are intentionally simplified or omitted:
+
+- Fraud detection
+- Distributed transactions
+- Multi-provider payment routing
+- PCI compliance requirements
+- Settlement and accounting systems
+
+---
+
+## API Documentation
+
+Live at:
+
+```text
+https://async-payments-service.onrender.com/docs
+```
+
+---
+
+## License
+
+This project is licensed under the Apache License 2.0.

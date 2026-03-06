@@ -1,6 +1,6 @@
-# PaymentFlow
+# HashPay
 
-PaymentFlow is a payment processing backend built with **Stripe** API.
+HashPay is a payment processing backend servicebuilt with **Stripe** API.
 
 The project explores payment lifecycle management, state transitions, Stripe integration, and webhook processing using a layered backend architecture.
 
